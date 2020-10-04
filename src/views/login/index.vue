@@ -1,5 +1,6 @@
 <template>
-  <div class="login-container">
+
+  <div class="login-container" :style="note">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
@@ -45,7 +46,7 @@
         </el-form-item>
       </el-tooltip>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;"  @click.native.prevent="handleLogin">登录</el-button>
 
       <div style="position:relative">
         <div class="tips">
@@ -77,10 +78,12 @@
 import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
 
+
 export default {
   name: 'Login',
-  components: { SocialSign },
+  components: {SocialSign},
   data() {
+
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
         callback(new Error('Please enter the correct user name'))
@@ -96,13 +99,20 @@ export default {
       }
     }
     return {
+      note: {
+        backgroundImage: "url(" +require("./electricty.jpg") + ")",
+        backgroundRepeat: "no-repeat",
+        backgroundSize:  "100% 100%",
+        marginTop: "5px",
+      },
+
       loginForm: {
         username: 'admin',
         password: '111111'
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        username: [{required: true, trigger: 'blur', validator: validateUsername}],
+        password: [{required: true, trigger: 'blur', validator: validatePassword}]
       },
       passwordType: 'password',
       capsTooltip: false,
@@ -114,7 +124,7 @@ export default {
   },
   watch: {
     $route: {
-      handler: function(route) {
+      handler: function (route) {
         const query = route.query
         if (query) {
           this.redirect = query.redirect
@@ -125,7 +135,7 @@ export default {
     }
   },
   created() {
-     window.addEventListener('storage', this.afterQRScan)
+    window.addEventListener('storage', this.afterQRScan)
   },
   mounted() {
     if (this.loginForm.username === '') {
@@ -133,13 +143,61 @@ export default {
     } else if (this.loginForm.password === '') {
       this.$refs.password.focus()
     }
+    // this.getCookie()
   },
   destroyed() {
-     window.removeEventListener('storage', this.afterQRScan)
+    window.removeEventListener('storage', this.afterQRScan)
   },
   methods: {
+    /*
+    //点击登录调用方法
+    submitForm(formName) {
+      //保存的账号
+      var name = this.loginForm.username;
+      //保存的密码
+      var pass = this.loginForm.password;
+      if (name == '' || name == null) {
+        alert("请输入正确的用户名");
+        return
+      } else if (pass == '' || pass == null) {
+        alert("请输入正确的密码");
+        return
+      }
+      this.setCookie(name,pass,7);
+
+    },
+    //设置cookie
+    setCookie(c_name,c_pwd,exdays) {
+      var exdate=new Date();//获取时间
+      exdate.setTime(exdate.getTime() + 24*60*60*1000*exdays);//保存的天数
+      //字符串拼接cookie
+      window.document.cookie="userName"+ "=" +c_name+";path=/;expires="+exdate.toGMTString();
+      window.document.cookie="userPwd"+"="+c_pwd+";path=/;expires="+exdate.toGMTString();
+    },
+    //读取cookie
+    getCookie:function () {
+      if (document.cookie.length>0) {
+        var arr=document.cookie.split('; ');//这里显示的格式需要切割一下自己可输出看下
+        for(var i=0;i<arr.length;i++){
+          var arr2=arr[i].split('=');//再次切割
+          //判断查找相对应的值
+          if(arr2[0]=='userName'){
+            this.loginForm.userName=arr2[1];//保存到保存数据的地方
+          }else if(arr2[0]=='userPwd'){
+            this.loginForm.password=arr2[1];
+          }
+        }
+      }
+    },
+    //清除cookie
+    clearCookie:function () {
+      this.setCookie("","",-1);//修改2值都为空，天数为负1天就好了
+    }
+  },
+  */
+
     checkCapslock(e) {
-      const { key } = e
+      const {key} = e
       this.capsTooltip = key && key.length === 1 && (key >= 'A' && key <= 'Z')
     },
     showPwd() {
@@ -158,7 +216,7 @@ export default {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
-              this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
+              this.$router.push({path: this.redirect || '/', query: this.otherQuery})
               this.loading = false
             })
             .catch(() => {
@@ -178,25 +236,26 @@ export default {
         return acc
       }, {})
     },
-     //afterQRScan() {
-       //if (e.key === 'x-admin-oauth-code') {
-         //const code = getQueryObject(e.newValue)
-         //const codeMap = {
-           //wechat: 'code',
-           //tencent: 'code'
-         //}
-         //const type = codeMap[this.auth_type]
-         //const codeName = code[type]
-         //if (codeName) {
-         //  this.$store.dispatch('LoginByThirdparty', codeName).then(() => {
-          //   this.$router.push({ path: this.redirect || '/' })
-          // })
-        // } else {
-        //   alert('第三方登录失败')
-        // }
-      // }
+    //afterQRScan() {
+    //if (e.key === 'x-admin-oauth-code') {
+    //const code = getQueryObject(e.newValue)
+    //const codeMap = {
+    //wechat: 'code',
+    //tencent: 'code'
+    //}
+    //const type = codeMap[this.auth_type]
+    //const codeName = code[type]
+    //if (codeName) {
+    //  this.$store.dispatch('LoginByThirdparty', codeName).then(() => {
+    //   this.$router.push({ path: this.redirect || '/' })
+    // })
+    // } else {
+    //   alert('第三方登录失败')
     // }
-  }
+    // }
+    // }
+
+  },
 }
 </script>
 
@@ -215,7 +274,9 @@ $cursor: #fff;
 }
 
 /* reset element-ui css */
+
 .login-container {
+
   .el-input {
     display: inline-block;
     height: 47px;
@@ -252,7 +313,10 @@ $bg:#2d3a4b;
 $dark_gray:#889aa4;
 $light_gray:#eee;
 
+
+
 .login-container {
+
   min-height: 100%;
   width: 100%;
   background-color: $bg;
